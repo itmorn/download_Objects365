@@ -53,9 +53,7 @@ if __name__ == '__main__':
     lst_lines = get_lst_lines()
     p = Pool(8)
     try:
-        result_list = p.map(thread_task, lst_lines)
-        print(result_list)
-
+        p.map(thread_task, lst_lines)
         p.close()
         p.terminate()
     except Exception as e:
