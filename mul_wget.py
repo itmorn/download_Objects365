@@ -85,4 +85,3 @@ if __name__ == '__main__':
         lst_p.append(p)
     [p.join() for p in lst_p]
     print(mydict)
-    # ceshi git
