@@ -9,15 +9,6 @@ import json
 from collections import defaultdict
 from tqdm import tqdm
 import numpy as np
-# dir_in = "train/"
-# # os.system(f"tar -zxf train/zhiyuan_objv2_train.tar.gz -C {dir_in}")
-# # my_tar = tarfile.open('train/zhiyuan_objv2_train.tar.gz')
-# # names = my_tar.getnames()
-# jsn = json.load(open(f"{dir_in}zhiyuan_objv2_train.json"))
-# images = jsn["images"][:10]
-# annotations = jsn["annotations"][:10]
-# categories = jsn["categories"]
-# del jsn
 
 
 def have_a_look():
@@ -45,7 +36,7 @@ def save_labelme(dic_imageId_dicAnnotations, dic_imageId_dicImages, map_id2c):
     # 每一张图像存一个json
     for imageId, lstAnnotations in dic_imageId_dicAnnotations.items():
         imagePath = os.path.basename(dic_imageId_dicImages[imageId]['file_name'])
-        if imagePath=='objects365_v1_00018748.jpg':
+        if imagePath == 'objects365_v1_00018748.jpg':
             print(lstAnnotations)
         dic = {
             "version": "5.0.1",
@@ -66,12 +57,13 @@ def save_labelme(dic_imageId_dicAnnotations, dic_imageId_dicImages, map_id2c):
                     (np.array(annotations['bbox'][:2]) + np.array(annotations['bbox'][2:])
                      ).tolist()
                 ],
+                "iscrowd": annotations['iscrowd'],
                 "group_id": None,
                 "shape_type": "rectangle",
                 "flags": {}
             }
             dic["shapes"].append(dic_inner)
-        name_jsn = dir_out + os.path.basename(imagePath).split(".")[0] + ".json"
+        name_jsn = dir_out_jsn + os.path.basename(imagePath).split(".")[0] + ".json"
         f = open(name_jsn, "w", encoding="utf-8")
         f.write(json.dumps(dic, indent=2))
         # print(name_jsn)
@@ -88,9 +80,8 @@ def extract_imgs(dic_imageId_dicImages):
                 name = entry.name
                 if name in set_url:
                     fileobj = tf.extractfile(entry)
-                    f = open(dir_out+os.path.basename(name), "wb")
+                    f = open(dir_out_img + os.path.basename(name), "wb")
                     f.write(fileobj.read())
-
 
 
 def extract_catagory(lst_catagory_we_need):
@@ -124,35 +115,24 @@ def extract_catagory(lst_catagory_we_need):
     save_labelme(dic_imageId_dicAnnotations, dic_imageId_dicImages, map_id2c)
 
     # 把对应的图像提取到指定文件夹
-    # extract_imgs(dic_imageId_dicImages)
+    extract_imgs(dic_imageId_dicImages)
 
 
 if __name__ == '__main__':
     dir_in = "val/"
     f_jsn = f"{dir_in}zhiyuan_objv2_val.json"
-    dir_out = "val_out/"
+    dir_out_img = "val_out_img/"
+    dir_out_jsn = "val_out_jsn/"
 
-    # if os.path.exists(dir_out):
-    #     os.system(f"rm -f {dir_out}*")
-    # else:
-    #     os.makedirs(dir_out)
+    if not os.path.exists(dir_out_img):
+        os.makedirs(dir_out_img)
+    if not os.path.exists(dir_out_jsn):
+        os.makedirs(dir_out_jsn)
+
 
     # have_a_look()
 
     lst_catagory_we_need = ["Moniter/TV", "Cell Phone", "Head Phone",
-                            "Telephone", "earphone", "Person", "Book", "Notepaper"]
+                            "Telephone", "earphone", "Person", "Book", "Notepaper", "Laptop"]
 
     extract_catagory(lst_catagory_we_need=lst_catagory_we_need)
-
-# lst_file = [dir_in + i for i in os.listdir(dir_in) if ".tar.gz" in i]
-# lst_file.sort()
-# for url_file in lst_file:
-#     # print(url_file)
-#     print(f"tar -zxf {url_file} -C {dir_in}")
-#
-# dir_in = "val/"
-# lst_file = [dir_in + i for i in os.listdir(dir_in) if ".tar.gz" in i]
-# lst_file.sort()
-# for url_file in lst_file:
-#     # print(url_file)
-#     print(f"tar -zxf {url_file} -C {dir_in}")
