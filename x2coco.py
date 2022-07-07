@@ -502,7 +502,7 @@ def main():
             if args.test_proportion != 0.0 and not os.path.exists(test_out_dir):
                 os.makedirs(test_out_dir)
         count = 1
-        for img_name in os.listdir(args.image_input_dir):
+        for img_name in tqdm(os.listdir(args.image_input_dir)):
             if count <= train_num:
                 if osp.exists(args.output_dir + '/train/'):
                     shutil.copyfile(

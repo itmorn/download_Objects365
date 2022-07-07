@@ -9,6 +9,7 @@ import json
 from collections import defaultdict
 from tqdm import tqdm
 import numpy as np
+import shutil
 
 
 def have_a_look():
@@ -140,14 +141,13 @@ if __name__ == '__main__':
     dir_out_img = f"{type}_out_img/"
     dir_out_jsn = f"{type}_out_jsn/"
 
+    shutil.rmtree(dir_out_img)
+    shutil.rmtree(dir_out_jsn)
+
     if not os.path.exists(dir_out_img):
         os.makedirs(dir_out_img)
-    else:
-        os.system(f"rm -f {dir_out_img}/*")
     if not os.path.exists(dir_out_jsn):
         os.makedirs(dir_out_jsn)
-    else:
-        os.system(f"rm -f {dir_out_jsn}/*")
 
 
     # have_a_look()
