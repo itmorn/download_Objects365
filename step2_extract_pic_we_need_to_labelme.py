@@ -108,7 +108,7 @@ def extract_catagory(lst_catagory_we_need):
         dic_imageId_dicAnnotations[image_id].append(dic)
     del annotations
 
-    # 如果仅仅有人，也过滤
+    # 如果仅仅有人，过滤，因为包含别的类的图片中已经有足够多的人了
     dic_category_count = defaultdict(int)
     dic_imageId_dicAnnotations2 = defaultdict(list)
     for img_id, lst_ans in dic_imageId_dicAnnotations.items():
@@ -134,6 +134,9 @@ def extract_catagory(lst_catagory_we_need):
 
 
 if __name__ == '__main__':
+    # 设置我们要抽取的类别，然后把相应的图片提取出来，
+    # 并把每一张图片的标注汇总到一个json文件，以labelme的格式存储，便于观看和编辑
+    # PS：在该脚本里，设置了一个个性化的过滤图像的需求（如果仅仅有人，过滤，因为包含别的类的图片中已经有足够多的人了），如果不需要，可以注释掉
     type = "train"  #train / val
 
     dir_in = f"{type}/"
@@ -141,14 +144,11 @@ if __name__ == '__main__':
     dir_out_img = f"{type}_out_img/"
     dir_out_jsn = f"{type}_out_jsn/"
 
-    shutil.rmtree(dir_out_img)
-    shutil.rmtree(dir_out_jsn)
+    shutil.rmtree(dir_out_img, ignore_errors=True)
+    shutil.rmtree(dir_out_img, ignore_errors=True)
 
-    if not os.path.exists(dir_out_img):
-        os.makedirs(dir_out_img)
-    if not os.path.exists(dir_out_jsn):
-        os.makedirs(dir_out_jsn)
-
+    os.makedirs(dir_out_img)
+    os.makedirs(dir_out_jsn)
 
     # have_a_look()
 
