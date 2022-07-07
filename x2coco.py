@@ -43,7 +43,7 @@ import numpy as np
 import PIL.ImageDraw
 from tqdm import tqdm
 import cv2
-
+import gc
 label_to_num = {}
 categories_list = []
 labels_list = []
@@ -148,13 +148,14 @@ def deal_json(ds_type, img_path, json_path):
     annotations_list = []
     image_num = -1
     object_num = -1
-    for img_file in os.listdir(img_path):
+    lst= os.listdir(img_path)
+    for img_file in tqdm(lst):
         img_label = os.path.splitext(img_file)[0]
         if img_file.split('.')[
                 -1] not in ['bmp', 'jpg', 'jpeg', 'png', 'JPEG', 'JPG', 'PNG']:
             continue
         label_file = osp.join(json_path, img_label + '.json')
-        print('Generating dataset from:', label_file)
+        # print('Generating dataset from:', label_file)
         image_num = image_num + 1
         with open(label_file) as f:
             data = json.load(f)
@@ -474,7 +475,10 @@ def main():
             os._exit(0)
 
         # Allocate the dataset.
-        total_num = len(glob.glob(osp.join(args.json_input_dir, '*.json')))
+        print("读取json")
+        # total_num = len(glob.glob(osp.join(args.json_input_dir, '*.json')))
+        total_num = len(os.listdir(args.json_input_dir))
+        print("读取json done")
         if args.train_proportion != 0:
             train_num = int(total_num * args.train_proportion)
             out_dir = args.output_dir + '/train'

@@ -34,10 +34,10 @@ def get_map_id2c(categories, lst_catagory_we_need):
 
 def save_labelme(dic_imageId_dicAnnotations, dic_imageId_dicImages, map_id2c):
     # 每一张图像存一个json
-    for imageId, lstAnnotations in dic_imageId_dicAnnotations.items():
+    for imageId, lstAnnotations in tqdm(dic_imageId_dicAnnotations.items()):
         imagePath = os.path.basename(dic_imageId_dicImages[imageId]['file_name'])
-        if imagePath == 'objects365_v1_00018748.jpg':
-            print(lstAnnotations)
+        # if imagePath == 'objects365_v1_00018748.jpg':
+        #     print(lstAnnotations)
         dic = {
             "version": "5.0.1",
             "flags": {},
@@ -107,32 +107,53 @@ def extract_catagory(lst_catagory_we_need):
         dic_imageId_dicAnnotations[image_id].append(dic)
     del annotations
 
+    # 如果仅仅有人，也过滤
+    dic_category_count = defaultdict(int)
+    dic_imageId_dicAnnotations2 = defaultdict(list)
+    for img_id, lst_ans in dic_imageId_dicAnnotations.items():
+        if len(set([i['category_id'] for i in lst_ans]) - {1}) == 0:
+            continue
+        dic_imageId_dicAnnotations2[img_id] = lst_ans
+        # 统计每个类别有多少个实例
+        for dic in lst_ans:
+            dic_category_count[map_id2c[dic['category_id']]] += 1
+
+    print(dic_category_count)
+
+
     # 只保留我们要的 images
-    dic_imageId_dicImages = {dic['id']: dic for dic in images if dic['id'] in dic_imageId_dicAnnotations}
+    dic_imageId_dicImages = {dic['id']: dic for dic in images if dic['id'] in dic_imageId_dicAnnotations2}
     del images
 
     # 抽取我们想要的物体 转出为labelme格式
-    save_labelme(dic_imageId_dicAnnotations, dic_imageId_dicImages, map_id2c)
+    save_labelme(dic_imageId_dicAnnotations2, dic_imageId_dicImages, map_id2c)
 
     # 把对应的图像提取到指定文件夹
     extract_imgs(dic_imageId_dicImages)
 
 
 if __name__ == '__main__':
-    dir_in = "val/"
-    f_jsn = f"{dir_in}zhiyuan_objv2_val.json"
-    dir_out_img = "val_out_img/"
-    dir_out_jsn = "val_out_jsn/"
+    type = "train"  #train / val
+
+    dir_in = f"{type}/"
+    f_jsn = f"{dir_in}zhiyuan_objv2_{type}.json"
+    dir_out_img = f"{type}_out_img/"
+    dir_out_jsn = f"{type}_out_jsn/"
 
     if not os.path.exists(dir_out_img):
         os.makedirs(dir_out_img)
+    else:
+        os.system(f"rm -f {dir_out_img}/*")
     if not os.path.exists(dir_out_jsn):
         os.makedirs(dir_out_jsn)
+    else:
+        os.system(f"rm -f {dir_out_jsn}/*")
 
 
     # have_a_look()
 
-    lst_catagory_we_need = ["Moniter/TV", "Cell Phone", "Head Phone",
-                            "Telephone", "earphone", "Person", "Book", "Notepaper", "Laptop"]
-
+    # lst_catagory_we_need = ["Head Phone",  "earphone"] #9 pp2.0的coco不需要加背景
+    lst_catagory_we_need = ["Moniter/TV", "Cell Phone", "Head Phone", "Telephone", "earphone",
+                            "Person", "Book", "Notepaper", "Laptop"] #9 pp2.0的coco不需要加背景
+    #{1: 'Person', 19: 'Book', 38: 'Moniter/TV', 62: 'Cell Phone', 74: 'Laptop', 124: 'Telephone', 126: 'Head Phone', 208: 'earphone', 282: 'Notepaper'}
     extract_catagory(lst_catagory_we_need=lst_catagory_we_need)
