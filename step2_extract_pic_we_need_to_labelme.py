@@ -99,12 +99,19 @@ def extract_catagory(lst_catagory_we_need):
     map_id2c = get_map_id2c(categories, lst_catagory_we_need)
     print(map_id2c)
 
+    # 有的图片标注的有问题，比如图像被旋转了，和标注的尺寸对不上
+    dic_imgName_imgId = {i['file_name'].split('/')[-1]: i['id'] for i in images}
+    lst_errorImg_name = ["objects365_v2_01118660.jpg"]
+    set_error_img_id = set([dic_imgName_imgId[i] for i in lst_errorImg_name])
+
     # 只保留我们要的 annotations
     dic_imageId_dicAnnotations = defaultdict(list)
     for dic in annotations:
         if dic['category_id'] not in map_id2c:
             continue
         image_id = dic['image_id']
+        if image_id in set_error_img_id:
+            continue
         dic_imageId_dicAnnotations[image_id].append(dic)
     del annotations
 
@@ -138,17 +145,18 @@ if __name__ == '__main__':
     # 并把每一张图片的标注汇总到一个json文件，以labelme的格式存储，便于观看和编辑
     # PS：在该脚本里，设置了一个个性化的过滤图像的需求（如果仅仅有人，过滤，因为包含别的类的图片中已经有足够多的人了），如果不需要，可以注释掉
     type = "train"  #train / val
+    type = "val"  #train / val
 
     dir_in = f"{type}/"
-    f_jsn = f"{dir_in}zhiyuan_objv2_{type}.json"
+    f_jsn = f"/data01/zhaoyichen/data/objects365/{dir_in}zhiyuan_objv2_{type}.json"
     dir_out_img = f"{type}_out_img/"
     dir_out_jsn = f"{type}_out_jsn/"
 
-    shutil.rmtree(dir_out_img, ignore_errors=True)
-    shutil.rmtree(dir_out_img, ignore_errors=True)
-
-    os.makedirs(dir_out_img)
-    os.makedirs(dir_out_jsn)
+    # shutil.rmtree(dir_out_img, ignore_errors=True)
+    # shutil.rmtree(dir_out_img, ignore_errors=True)
+    #
+    # os.makedirs(dir_out_img)
+    # os.makedirs(dir_out_jsn)
 
     # have_a_look()
 
